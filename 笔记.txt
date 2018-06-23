@@ -1,0 +1,73 @@
+建表：
+       CREATE TABLE ENROLLS(
+                SNO NUMRIC(6,0) NOT NULL
+                CNO CHAR(4) NOT NULL
+                GRADE INT
+                PRIMARY KEY(SNO,CNO)
+                FOREIGN KEY(SNO) REFERENCES STUDENTS(SNO)
+                CHECK(GRADE IS NULL)OR((GARDE BETWEEN 0 AND 100))
+)
+                注释：1.CHECK 约束用于限制列中的值的范围。
+                          2.NUMERIC(a,b)函数有两个参数，前面一个为总的位数，后面一个参数是小数点后的位数。
+                          3.FOREIGN KEY 约束 :一个表中的 FOREIGN KEY 指向另一个表中的PRIMARY KEY。
+
+在原表建立一个指定值的表：
+       CREATE TABLE GIRLS AS SELECT NAME,SNO,AGE FROM STUDENTS WHERE SEX='GILR'
+                注释：1.AS一般用在两个地方，QUERY的时候，返回指定重新返回的COLUMN的名字
+                          2. CREATE TABLE时AS是个关键字
+
+创建视图：
+       CREATE VIEW FACULTY AS SELECT TNO,TNAME,AGE FROM TEACHER
+
+删除视图：
+       DROP VIEW GRADE_TABLE RESTRICT
+                注释：CASCADE为连锁删除，RESTRICT为约束删除
+
+多表查询：
+       CREATE SELECT S.NAME,C.CNO,E.GRADE FROM STUDENTS S，COURESES C,ENROLLS E WHERE S.SNO=E.SNO AND C.CNO=E.CNO
+                注释：用主外键约束来实现多表的关联 
+建立索引：
+       CREATE INDEX mycolumn_index ON mytable (myclumn)
+
+单表查询：
+        1.找出年龄在20~27岁之间，籍贯是湖南或湖北的学生的学号、姓名和年龄，并按年龄升序排序。
+           SELECT SNO,NAME,AGE FROM STUDENT WHERE (AGE BETWEENK 27 AND 27) AND BPLACE  LIKE  '湖%' ORDER BY ASC
+        2.找出学生表中籍贯是空值的学生的姓名和性别
+            SELECT NAME,SEX FROM STUDENT WHERE BPLACE IS NULL  
+                   注：在 SQL 中不能使用条件：＜列名＞＝ NULL 。在 SQL 中只有一个特殊的查询条件允许查询 NULL 值：）
+
+多表操作：
+        1.找出成绩在90分以上的学生的姓名
+            SELECT NAME FROM STUDETN WHERE SNO IN（SELECT SNO FROM WHERE GRADE>90）
+         2.查询全部学生的学生名和所学课程及成绩
+             SELECT  NAME,CNO,GRADE FROM STUDENTS,ENROLLS WHERE STUDENT.SNO=ENROLLS.SNO
+         3.找出籍贯为山西或河北，成绩为90分以上的学生的姓名，籍贯和成绩
+              SELECT NAME,BPLACE,GRADE FROM STUDENTS,ENROLLS WHERE BPLACE IN ('山西'，‘河北’) AND GRADE>=90 AND STUDENTS.SNO=ENROLLS.SNO
+                         注：（当构造多表连接查询命令时，必须遵循两条规则。第一，连接条件数正好比表数少 1 （若有三个表，就有两个连接条件 ) ；第二，若一个表中的主关键字是由多个列组成，则对此主关键字中的每一个列都要有一个连接条件（也有少数例外情况））
+          4.找出教师的最小年龄
+               SELECT MIN(AGE) FROM TEACHER
+                        注：内部函数： SQL 标准中只使用 COUNT 、 SUM 、 AVG 、 MAX 、 MIN 函数，称之为聚集函数（ Set Function ）。 COUNT 函数的结果是该列统计值的总数目， SUM 函数求该列统计值之和， AVG 函数求该列统计值之平均值， MAX 函数求该列最大值， MIN 函数求该列最小值。
+
+          5.统计年龄小于等于22岁的学生人数
+                 SELECT COUNT(*) FROM STUDENT WHERE AGE<=22
+ 
+          6.找出学生的平均成绩和所学课程门数
+                  SELECT AVG(GRADE),SNO,COUNT(CNO) FROM ENROLLS GROUP BY SNO
+
+          7.找出年龄超过平均年龄的学生姓名
+                   SELECT NAME FROM STUDENT WHERE AGE>(SELECT AVG(AGE) FROM STUDENTS)
+                        注：where子句中不能使用聚集函数，而having子句中可以
+ 
+          8.找出各课程的平均成绩，按课程号分组，且只选择学生超过3人的课程的成绩
+                     SELECT CNO,AVG(GRADE) FROM ENROLLS GROUP BY CNO HAVING COUNT(*)>=3
+                        注： GROUP BY 与 HAVING
+                                GROUP BY 子句把一个表按某一指定列（或一些列）上的值相等的原则分组，然后再对每组数据进行规定的操作。如果要用到group by 一般用到的就是“每这个字” 
+                                GROUP BY 子句总是跟在 WHERE 子句后面，当 WHERE 子句缺省时，它跟在 FROM 子句后面。
+                                HAVING 子句常用于在计算出聚集之后对行的查询进行控制。每个分组里组条数>=10的组才输出
+
+         9.查询没有选任何课程的学生的学号和姓名
+                       SELECT SNO ,STUDENT FROM STUDENT WHERE NOT EXIST (SELECT * FROM ENROLLS WHERE ENROLLS.SNO=STUDENT.SNO)
+          
+         10.查询哪些课程只有男生选读
+                        SELECT CNAME FROM COURSES WHERE NOT EXIST 
+                                
